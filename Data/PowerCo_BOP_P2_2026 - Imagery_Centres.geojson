@@ -1,0 +1,34 @@
+{
+    "type": "FeatureCollection",
+    "name": "PowerCo_BOP_P2_2026 - Imagery_Centres",
+    "crs": {
+        "type": "name",
+        "properties": {
+            "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+        }
+    },
+    "xy_coordinate_resolution": 1e-15,
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "Project": "PGRM3365",
+                "Proj_Name": "PowerCo BOP P2 2026",
+                "Company_Name": "AiDash Inc",
+                "SN_No": "SN14592",
+                "Description": "NI Powerco Network (BOP/Coromandel) 2026/27 orthos",
+                "OrthoGSD_m": 0.25,
+                "PointDensity_(points/m2)": null,
+                "Area": 6293.725,
+                "Percentage_Coverage": 100.0
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    175.804382612995937,
+                    -37.570649122389817
+                ]
+            }
+        }
+    ]
+}

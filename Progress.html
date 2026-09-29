@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Project Progress Table</title>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    table { border-collapse: collapse; font-size: 14px; width: 100%; margin: 20px 0; }
+    th, td { border: 1px solid #ccc; padding: 8px 10px; text-align: center; }
+    th { background-color: #1976d2; color: white; }
+    .progress-bar-container { background-color: #eee; border-radius: 5px; height: 20px; width: 100%; position: relative; }
+    .progress-bar { background-color: #4CAF50; height: 100%; border-radius: 5px; text-align: center; color: white; font-size: 12px; line-height: 20px; }
+    .checkmark { font-size: 18px; color: green; }
+    .error { margin: 12px 0; padding: 10px; border: 1px solid #f99; background: #fee; color: #900; }
+  </style>
+</head>
+<body>
+
+  <div id="err" class="error" style="display:none"></div>
+
+  <table id="taskTable" border="1" cellpadding="5">
+    <tr>
+      <!-- <th>Project Ref</th> -->
+      <th>Task</th>
+      <th>Start</th>
+      <th>End</th>
+      <th>Progress</th>
+      <th>Complete</th>
+    </tr>   
+  </table>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const PROJECT_REF =
+      params.get("ref") ||
+      (typeof window.__PROGRESS_REF__ !== "undefined" ? window.__PROGRESS_REF__ : null);
+
+    // ✅ Correct raw URL (no "refs/heads")
+    const CSV_URL = 'https://raw.githubusercontent.com/aerialsurveysnz/Project_management_Data/main/Project_Plan_Data.csv';
+
+    fetch(CSV_URL + '?nocache=' + Date.now(), { cache: 'no-store' })
+      .then(r => {
+        if (!r.ok) throw new Error(`Fetch failed: ${r.status} ${r.statusText}`);
+        return r.text();
+      })
+      .then(text => {
+        const lines = text.trim().split(/\r?\n/);
+        const headers = lines.shift().split(',').map(h => h.trim().toLowerCase());
+        const col = Object.fromEntries(headers.map((h,i)=>[h,i]));
+        const table = document.getElementById('taskTable');
+
+        lines.forEach(line => {
+          if (!line.trim()) return;
+          const cells = line.split(',').map(c => c.trim());
+
+          const ref = cells[col.projectref];
+          // Only filter if a ref was provided; otherwise show all rows
+          if (PROJECT_REF && ref !== PROJECT_REF) return;
+
+          const task = cells[col.task];
+          const start = cells[col.start];
+          const end   = cells[col.end];
+          const progress = parseInt(cells[col.progress] || 0, 10);
+          const complete = (cells[col.complete] || '').toLowerCase() === 'true';
+
+          const row = table.insertRow();
+          // row.insertCell().textContent = ref; // uncomment if you want to show Project Ref
+          row.insertCell().textContent = task || '';
+          row.insertCell().textContent = start || '';
+          row.insertCell().textContent = end || '';
+          row.insertCell().innerHTML = `
+            <div class="progress-bar-container">
+              <div class="progress-bar" style="width:${isFinite(progress)?progress:0}%;">
+                ${isFinite(progress)?progress:0}%
+              </div>
+            </div>`;
+          row.insertCell().innerHTML = complete ? '<span class="checkmark">&#10004;</span>' : '';
+        });
+      })
+      .catch(err => {
+        const el = document.getElementById('err');
+        el.textContent = 'CSV load error: ' + (err.message || String(err));
+        el.style.display = 'block';
+        console.error(err);
+      });
+  </script>
+</body>
+</html>
